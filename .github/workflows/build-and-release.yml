@@ -58,5 +58,5 @@ jobs:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         automatic_release_tag: latest
         prerelease: false
-        title: "Tidarr Integration Plugin"
+        title: "Tidarr Integration Plugin for TidalLuna"
         files: ./dist/**
