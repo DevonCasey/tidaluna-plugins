@@ -1,0 +1,13 @@
+{
+  "name": "@devoncasey/tidarr-integration-luna",
+  "version": "1.0.0",
+  "description": "TidaLuna plugin to tell Tidarr to download tracks via context menu",
+  "main": "index.ts",
+  "keywords": ["tidaluna", "plugin", "tidarr", "download"],
+  "author": "Devon Casey",
+  "license": "MIT",
+  "luna": {
+    "displayName": "Tidarr Integration",
+    "description": "Send tracks, albums, and playlists to Tidarr for download via context menu"
+  }
+}
