@@ -1,83 +1,95 @@
-# Luna Plugins
+# TidalLuna Plugins
 
-This is a template & example of how to develop **[Tidal Luna](https://github.com/Inrixia/TidaLuna)** plugins.
+A collection of TidalLuna plugins. Well, the one plugin.
 
-## Getting Started
+## Tidarr Integration
 
-Follow these steps to create your own Luna plugin using this template:
+A plugin that integrates with [Tidarr](https://github.com/cstaelen/tidarr) to send tracks and albums from Tidal directly to your media server.
 
-### 1. Clone the Repository
+### What it does
 
-```sh
-git clone https://github.com/Inrixia/luna-template.git luna-plugins
-cd luna-plugins
-```
+Right-click on any track or album in Tidal and send it to Tidarr for download. Supports password-protected Tidarr instances and lets you choose download quality (low, normal, high, master).
 
-### 2. Install Node.js (if missing)
+### Requirements
 
-If you don't have Node.js installed, use [nvm](https://github.com/nvm-sh/nvm):
+- [TidalLuna](https://github.com/Inrixia/TidaLuna) installed and working
+- [Tidarr](https://github.com/cstaelen/tidarr) running somewhere you can access
+- Tidarr configured with your Tidal credentials
 
-```sh
-nvm install node
-nvm use node
-```
+## Installation
 
-> This will install and use the latest Node.js version.
+### From URL (easiest)
 
-### 3. Enable pnpm via Corepack
+1. Open Tidal with TidalLuna
+2. Go to Settings > Plugins  
+3. Click "Install from URL"
+4. Paste: `https://github.com/DevonCasey/tidal-luna-plugins/releases/download/latest/store.json`
 
-[Corepack](https://nodejs.org/api/corepack.html) is included with Node.js 16.10+.
+### Manually
 
-```sh
+```bash
+git clone https://github.com/DevonCasey/tidal-luna-plugins.git
+cd tidal-luna-plugins
 corepack enable
 corepack prepare pnpm@latest --activate
-```
-
-### 4. Install Dependencies
-
-```sh
 pnpm install
+pnpm run watch
 ```
 
-### 5. Start Developing
+Then in TidalLuna, go to Settings > Plugin Store and install from the dev server that appears.
 
-- Edit files in the `plugins/Example` directory to build your plugin.
-- Use `pnpm run watch` to build and serve with hot reload.
+## Setup
 
-> While developing, you can install and test your plugin via the _DEV_ store that should appear under **Plugin Store** in **Luna Settings**  
-> ![image](https://github.com/user-attachments/assets/c159bf00-6feb-41c8-8884-3d9e63070c19)
+After installing, configure the plugin in Settings > Plugins > Tidarr Integration:
 
-### 6. Update the README
+- **Tidarr URL**: Where your Tidarr instance is running (like `http://localhost:8484`). Don't forget the http://.
+- **Admin Password**: Leave empty if no password, otherwise enter your Tidarr admin password  
+- **Download Quality**: Pick from low, normal, high, or master
 
-Replace this README with information about your plugin:
+## Usage
 
-- What it does
-- How to use it
-- Any configuration or setup steps
+Right-click on any track or album in Tidal and choose "Send to Tidarr". The plugin will authenticate with your Tidarr instance and add the item to the download queue.
 
-### 7. GitHub Actions: Workflow Permissions
+## Development
 
-If you want to use the included GitHub Action in (`.github`) to automatically create releases, you must set your repository workflow permissions to **Read and write permissions**:
+For local development:
 
-1. Go to your repository's settings: `Settings > Actions > General` https://github.com/.../.../settings/actions
-1. Under **Workflow permissions**, select **Read and write permissions**.
-1. Click **Save**.
+```bash
+pnpm install
+pnpm run watch  # builds and serves plugins on localhost:3000
+```
 
-This allows the GitHub Action to create releases on your behalf.
+The dev server shows up in TidalLuna's Plugin Store automatically.
 
-### 8. Install your plugins from GitHub
+## Troubleshooting
 
-After your action has build the plugins, you can install from the releases page.
-For example for **@luna/example**  
-https://github.com/.../.../releases/download/latest/luna.example
+If downloads aren't working:
 
-Or install the store with
-https://github.com/.../.../releases/download/latest/store.json
+- Make sure Tidarr is running and accessible at the URL you configured
+- Test if the Tidarr API is responsive:
 
-### 9. PR [TidaLuna](https://github.com/Inrixia/TidaLuna) to add your store
+```bash
+# Set your Tidarr details
+TIDARR_URL="https://tidarr.example.com"
+TIDARR_PASSWORD="your-password"
 
-You can open a PR to add your store url to the default stores in client if youd like <3
+# Test authentication
+curl -X POST "$TIDARR_URL/api/auth" \
+  -H "Content-Type: application/json" \
+  -d "{\"password\": \"$TIDARR_PASSWORD\"}"
 
----
+# Should return: {"accessGranted":true,"token":"..."}
 
-For more details, see the [Tidal Luna documentation](https://github.com/Inrixia/TidaLuna).
+# Test without authentication  
+curl -X GET "$TIDARR_URL/api/is_auth_active"
+# Should return: "false" if no auth required
+```
+
+- Check that your admin password is correct (if you set one)
+- Verify Tidarr is authenticated with Tidal and has proper download permissions
+
+## Credits
+
+- Lovingly inspired by the SongDownloader plugin written by [Inrixia](https://github.com/Inrixia/luna-plugins/tree/master/plugins/SongDownloader)
+
+<small>Built for [TidalLuna](https://github.com/Inrixia/TidaLuna) and [Tidarr](https://github.com/cstaelen/tidarr).</small>

@@ -1,0 +1,107 @@
+name: Build and Release Plugins
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: Enable Corepack
+      run: corepack enable
+      
+    - name: Setup pnpm
+      run: corepack prepare pnpm@latest --activate
+      
+    - name: Install dependencies
+      run: pnpm install
+      
+    - name: Build plugins
+      run: pnpm run build
+      
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: luna-plugins
+        path: dist/
+        
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    permissions:
+      contents: write
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: luna-plugins
+        path: dist/
+        
+    - name: Create Plugin Store JSON
+      run: |
+        cat > dist/store.json << 'EOF'
+        {
+          "plugins": [
+            {
+              "name": "Tidarr Integration",
+              "description": "Send tracks and albums from Tidal directly to Tidarr for download",
+              "author": "Devon Casey",
+              "version": "1.0.${{ github.run_number }}",
+              "downloadUrl": "https://github.com/DevonCasey/tidal-luna-plugins/releases/download/latest/tidarr-integration.luna"
+            }
+          ]
+        }
+        EOF
+        
+    - name: Create Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Delete existing 'latest' tag and release if it exists (ignore errors if they don't exist)
+        gh release delete latest --yes 2>/dev/null || true
+        git tag -d latest 2>/dev/null || true
+        git push origin --delete latest 2>/dev/null || true
+        
+        # Create release notes file
+        cat > release_notes.md << 'EOF'
+        ## Tidarr Integration Plugin
+        
+        Send tracks and albums from Tidal directly to Tidarr for download.
+        
+        ### Installation
+        1. Open TidalLuna
+        2. Go to Settings → Plugins  
+        3. Click "Install from URL"
+        4. Paste: `https://github.com/DevonCasey/tidal-luna-plugins/releases/download/latest/store.json`
+        
+        ### Features
+        - Right-click context menu integration
+        - JWT authentication support  
+        - Configurable download quality (low/normal/high/master)
+        - Clean settings UI with connection testing
+        
+        ### Manual Installation
+        Download `tidarr-integration.luna` below and install via "Install from file" in TidalLuna.
+        EOF
+        
+        # Create new release with 'latest' tag
+        gh release create latest \
+          --title "Tidarr Integration v1.0.${{ github.run_number }}" \
+          --notes-file release_notes.md \
+          dist/*.luna dist/store.json

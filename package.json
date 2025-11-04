@@ -1,9 +1,14 @@
 {
-	"name": "@luna/template",
-	"description": "Template repo for making your own luna plugins",
+	"name": "@devoncasey/tidalluna-plugins",
+	"description": "A collection of plugins for TidalLuna.",
+	"author": "Devon Casey",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/DevonCasey/TidalLuna-Plugins.git"
+	},
 	"type": "module",
 	"scripts": {
-		"watch": "concurrently \"pnpm:build --watch\" pnpm:serve",
+		"watch": "concurrently \"npm run build -- --watch\" \"npm run serve\"",
 		"build": "rimraf ./dist && tsx esbuild.config.ts",
 		"serve": "http-server ./dist -p 3000 -s --cors -c-1"
 	},

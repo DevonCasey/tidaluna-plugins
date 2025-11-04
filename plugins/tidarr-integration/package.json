@@ -1,0 +1,9 @@
+{
+  "name": "tidarr-integration",
+  "description": "Send tracks, albums, playlists, and artists to Tidarr for download via context menu.",
+  "author": {
+    "name": "Devon Casey",
+    "url": "https://github.com/DevonCasey"
+  },
+  "main": "./src/index.ts"
+}
