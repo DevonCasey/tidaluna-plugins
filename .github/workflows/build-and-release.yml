@@ -55,10 +55,28 @@ jobs:
         path: ./dist/
         
     - name: Publish latest release on GitHub
-      uses: marvinpinto/action-automatic-releases@latest
+      uses: softprops/action-gh-release@v2
       with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        automatic_release_tag: latest
-        prerelease: false
-        title: "Tidarr Integration Plugin for TidalLuna"
+        tag_name: latest
+        name: "Tidarr Integration Plugin for TidalLuna"
+        body: |
+          ## Tidarr Integration Plugin
+
+          Send tracks and albums from Tidal directly to Tidarr for download.
+
+          ### Installation
+          1. Open TidalLuna
+          2. Go to Settings → Plugins  
+          3. Click "Install from URL"
+          4. Paste: `https://github.com/DevonCasey/tidal-luna-plugins/releases/download/latest/store.json`
+
+          ### Features
+          - Right-click context menu integration
+          - JWT authentication support  
+          - Configurable download quality (low/normal/high/master)
+          - Clean settings UI with connection testing
+
+          ### Manual Installation
+          Download files below and install via "Install from file" in TidalLuna.
         files: ./dist/**
+        fail_on_unmatched_files: false
