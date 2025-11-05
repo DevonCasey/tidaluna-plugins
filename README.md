@@ -12,8 +12,9 @@ Right-click on any track or album in Tidal and send it to Tidarr for download. S
 
 ### Requirements
 
-- [TidalLuna](https://github.com/Inrixia/TidaLuna) installed and working
-- [Tidarr](https://github.com/cstaelen/tidarr) running somewhere you can access
+- [TidalLuna](https://github.com/Inrixia/TidaLuna) installed
+- [Tidarr](https://github.com/cstaelen/tidarr) is accessible somewhere on your network
+- An active Tidal subscription
 
 ### Installation
 
