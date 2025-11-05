@@ -42,8 +42,8 @@ async function sendToTidarr(mediaItem: any) {
 				
 		if (mediaItem.type === "album" || mediaItem.album) {
 			itemType = "album";
-			// luna often provides fake sequential ids that are off by 1
 			const rawId = mediaItem.album?.id || mediaItem.id;
+            // keep getting an ID off by 1... let's adjust for that in the dirtiest way possible
 			itemId = String(parseInt(rawId) - 1);
 			title = tags.album || mediaItem.album?.name || mediaItem.name || "Unknown Album";
 			artist = tags.albumartist || tags.artist || mediaItem.artists?.[0]?.name || "Unknown Artist";
