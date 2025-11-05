@@ -1,6 +1,6 @@
 {
   "name": "tidarr-integration",
-  "description": "Send tracks, albums, playlists, and artists to Tidarr for download via context menu.",
+  "description": "Send tracks and albums to Tidarr for download right from TidalLuna.",
   "author": {
     "name": "Devon Casey",
     "url": "https://github.com/DevonCasey"

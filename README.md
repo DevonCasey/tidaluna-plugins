@@ -31,7 +31,7 @@ Navigate to the **Plugin Store** and download away!
 
 After installing, configure the plugin in Settings > Plugins > Tidarr Integration:
 
-- **Tidarr URL**: Where your Tidarr instance is running (like `http://localhost:8484`). Don't forget the http://. Doesn't support SSL.
+- **Tidarr URL**: Where your Tidarr instance is running (like `http://localhost:8484`).
 - **Admin Password**: Leave empty if no password, otherwise enter your Tidarr admin password  
 - **Download Quality**: Pick from low, normal, high, or master
 
@@ -43,7 +43,7 @@ Right-click on any track or album in Tidal and choose **Send to Tidarr**. The pl
 
 If downloads aren't working:
 
-- Make sure Tidarr is running and accessible at the URL you configured
+- Make sure Tidarr is running and accessible at the correct URL
 - Test if the Tidarr API is responsive:
 
 ```bash
@@ -64,7 +64,8 @@ curl -X GET "$TIDARR_URL/api/is_auth_active"
 ```
 
 - Check that your admin password is correct (if you set one)
-- Verify Tidarr is authenticated with Tidal and has proper download permissions
+- Verify Tidarr works on its own
+- Open a ticket
 
 ## Development
 
