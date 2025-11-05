@@ -16,52 +16,30 @@ Right-click on any track or album in Tidal and send it to Tidarr for download. S
 - [Tidarr](https://github.com/cstaelen/tidarr) running somewhere you can access
 - Tidarr configured with your Tidal credentials
 
-## Installation
+### Installation
 
-### From URL (easiest)
+This will add this repo as a source for plugins that will appear in the store to download.
 
 1. Open Tidal with TidalLuna
-2. Go to Settings > Plugins  
-3. Click "Install from URL"
+2. Go to **Settings** > **Plugins**
+3. Click **Install from URL**
 4. Paste: `https://github.com/DevonCasey/tidal-luna-plugins/releases/download/latest/store.json`
 
-### Manually
+Navigate to the **Plugin Store** and download away!
 
-```bash
-git clone https://github.com/DevonCasey/tidal-luna-plugins.git
-cd tidal-luna-plugins
-corepack enable
-corepack prepare pnpm@latest --activate
-pnpm install
-pnpm run watch
-```
-
-Then in TidalLuna, go to Settings > Plugin Store and install from the dev server that appears.
-
-## Setup
+### Setup
 
 After installing, configure the plugin in Settings > Plugins > Tidarr Integration:
 
-- **Tidarr URL**: Where your Tidarr instance is running (like `http://localhost:8484`). Don't forget the http://.
+- **Tidarr URL**: Where your Tidarr instance is running (like `http://localhost:8484`). Don't forget the http://. Doesn't support SSL.
 - **Admin Password**: Leave empty if no password, otherwise enter your Tidarr admin password  
 - **Download Quality**: Pick from low, normal, high, or master
 
-## Usage
+### Usage
 
-Right-click on any track or album in Tidal and choose "Send to Tidarr". The plugin will authenticate with your Tidarr instance and add the item to the download queue.
+Right-click on any track or album in Tidal and choose **Send to Tidarr**. The plugin will talk with your Tidarr instance and add the item to the download queue.
 
-## Development
-
-For local development:
-
-```bash
-pnpm install
-pnpm run watch  # builds and serves plugins on localhost:3000
-```
-
-The dev server shows up in TidalLuna's Plugin Store automatically.
-
-## Troubleshooting
+### Troubleshooting
 
 If downloads aren't working:
 
@@ -87,6 +65,21 @@ curl -X GET "$TIDARR_URL/api/is_auth_active"
 
 - Check that your admin password is correct (if you set one)
 - Verify Tidarr is authenticated with Tidal and has proper download permissions
+
+## Development
+
+For local development:
+
+```bash
+git clone https://github.com/DevonCasey/tidal-luna-plugins.git
+cd tidal-luna-plugins
+corepack enable
+corepack prepare pnpm@latest --activate
+pnpm install
+pnpm run watch
+```
+
+The local repo will then appear in the **Plugin Store**, select what you want to download and test there.
 
 ## Credits
 
