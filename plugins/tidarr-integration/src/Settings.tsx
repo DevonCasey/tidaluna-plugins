@@ -11,9 +11,18 @@ import React from "react";
 type PluginSettings = {
   tidarrUrl: string;
   adminPassword: string;
-  downloadQuality: string;
+  downloadQuality: "low" | "normal" | "high" | "master";
   debugMode: boolean;
 };
+
+interface TidarrAuthResponse {
+  accessGranted?: boolean;
+  token?: string;
+}
+
+interface IsAuthActiveResponse {
+  isAuthActive?: boolean;
+}
 
 // load settings once and keep a single reactive object
 export const settings = await ReactiveStore.getPluginStorage<PluginSettings>(
@@ -32,10 +41,15 @@ export const Settings = () => {
   const [downloadQuality, setDownloadQuality] = React.useState(settings.downloadQuality);
   const [debugMode, setDebugMode] = React.useState(settings.debugMode);
   const [testing, setTesting] = React.useState(false);
-  const [testResult, setTestResult] = React.useState<string | null>(null);
+  const [testResult, setTestResult] = React.useState<"success" | "failure" | null>(null);
 
-  // test tidarr connection logic
   const testTidarrConnection = async () => {
+    if (!tidarrUrl.trim()) {
+      setTestResult("failure");
+      setTimeout(() => setTestResult(null), 3000);
+      return;
+    }
+
     setTesting(true);
     setTestResult(null);
 
@@ -48,7 +62,7 @@ export const Settings = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ password: adminPassword || "" }),
-        });
+        }) as TidarrAuthResponse;
 
         if (authResponse?.token) {
           setTestResult("success");
@@ -59,6 +73,7 @@ export const Settings = () => {
         setTestResult("success");
       }
     } catch (error) {
+      console.error("Tidarr connection test failed:", error);
       setTestResult("failure");
     } finally {
       setTesting(false);

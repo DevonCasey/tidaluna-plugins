@@ -5,20 +5,42 @@ on:
     branches:
       - main
     paths:
-      - 'plugins/tidarr-integration/**'
-      - 'plugins/**'
+      - 'plugins/tidarr-integration/package.json'
+
+permissions:
+  contents: write
 
 jobs:
+  read_version:
+    runs-on: ubuntu-latest
+    outputs:
+      pkg_version: ${{ steps.read.outputs.pkg_version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Read version from package.json
+        id: read
+        run: |
+          # Prefer jq if available; fallback to python if not
+          if command -v jq >/dev/null 2>&1; then
+            version=$(jq -r .version plugins/tidarr-integration/package.json)
+          else
+            version=$(python -c "import json;print(json.load(open('plugins/tidarr-integration/package.json'))['version'])")
+          fi
+          echo "pkg_version=$version" >> $GITHUB_OUTPUT
+
   call-shared-workflow:
+    needs: read_version
     uses: ./.github/workflows/build-and-release.yml
     with:
       release_type: stable
-      tag_name: v${{ github.run_number }}
+      tag_name: ${{ needs.read_version.outputs.pkg_version }}
       prerelease: false
       branch: refs/heads/main
-      release_title: "Release v${{ github.run_number }}"
+      release_title: "Release v${{ needs.read_version.outputs.pkg_version }}"
       release_body: |
-        Tidarr Integration Plugin
+        ## Tidarr Integration Plugin
 
         Send tracks and albums from Tidal directly to Tidarr for download.
 
