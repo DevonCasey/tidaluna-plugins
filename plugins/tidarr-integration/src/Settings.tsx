@@ -92,7 +92,7 @@ export const Settings = () => {
           setTidarrUrl(newValue);
           settings.tidarrUrl = newValue;
         }}
-        style={{ maxWidth: "500px", marginLeft: "auto" }}
+        style={{ minWidth: "150px", maxWidth: "250px", marginLeft: "auto" }}
       />
 
       <LunaTextSetting
@@ -105,7 +105,7 @@ export const Settings = () => {
           setAdminPassword(newValue);
           settings.adminPassword = newValue;
         }}
-        style={{ maxWidth: "200px", marginLeft: "auto" }}
+        style={{ minWidth: "150px", maxWidth: "250px", marginLeft: "auto" }}
       />
 
       <LunaSelectSetting
@@ -117,7 +117,7 @@ export const Settings = () => {
           setDownloadQuality(newValue);
           settings.downloadQuality = newValue;
         }}
-        style={{ maxWidth: "100px", marginLeft: "auto" }}
+        style={{ minWidth: "80px", maxWidth: "80px", marginLeft: "auto" }}
       >
         <LunaSelectItem value="low">Low</LunaSelectItem>
         <LunaSelectItem value="normal">Normal</LunaSelectItem>
@@ -156,6 +156,7 @@ export const Settings = () => {
             borderRadius: "4px",
             cursor: testing ? "not-allowed" : "pointer",
             minWidth: "160px",
+            maxWidth: "240px",
             fontSize: "14px",
             fontWeight: 500,
             textAlign: "center",
