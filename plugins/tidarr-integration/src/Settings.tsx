@@ -77,6 +77,7 @@ export const Settings = () => {
           setTidarrUrl(newValue);
           settings.tidarrUrl = newValue;
         }}
+        style={{ maxWidth: "500px", marginLeft: "auto" }}
       />
 
       <LunaTextSetting
@@ -89,6 +90,7 @@ export const Settings = () => {
           setAdminPassword(newValue);
           settings.adminPassword = newValue;
         }}
+        style={{ maxWidth: "200px", marginLeft: "auto" }}
       />
 
       <LunaSelectSetting
@@ -100,6 +102,7 @@ export const Settings = () => {
           setDownloadQuality(newValue);
           settings.downloadQuality = newValue;
         }}
+        style={{ maxWidth: "100px", marginLeft: "auto" }}
       >
         <LunaSelectItem value="low">Low</LunaSelectItem>
         <LunaSelectItem value="normal">Normal</LunaSelectItem>
@@ -110,10 +113,19 @@ export const Settings = () => {
       <LunaSwitchSetting
         title="Debug Mode"
         desc="Enables context menu button for debugging purposes"
+<<<<<<< Updated upstream
         checked={debugMode}
         onChange={(_, checked) => {
           setDebugMode(checked);
           settings.debugMode = checked;
+=======
+        // currently commented out due to typing issues in TidaLuna
+        // checked={debugMode}
+        {...({ checked: debugMode } as any)}
+        onChange={(_event: React.ChangeEvent<HTMLInputElement>, nextChecked: boolean) => {
+          setDebugMode(nextChecked);
+          settings.debugMode = nextChecked;
+>>>>>>> Stashed changes
         }}
       />
 

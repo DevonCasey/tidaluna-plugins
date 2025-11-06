@@ -1,9 +1,14 @@
 {
   "name": "tidarr-integration",
+<<<<<<< Updated upstream
   "description": "Sends tracks and albums to Tidarr for download right from TidalLuna.",
   "version": "1.0.0",
+=======
+  "description": "Sends tracks and albums to Tidarr for download right from TidaLuna.",
+  "version": "1.0.6",
+>>>>>>> Stashed changes
   "license": "MIT",
-  "homepage": "https://github.com/DevonCasey/tidal-luna-plugins#tidarr-integration",
+  "homepage": "https://github.com/DevonCasey/tidaluna-plugins#tidarr-integration",
   "author": {
     "name": "Devon Casey",
     "url": "https://github.com/DevonCasey",
