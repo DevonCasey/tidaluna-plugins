@@ -13,6 +13,5 @@ jobs:
     uses: ./.github/workflows/build-and-release.yml
     with:
       release_type: dev
-      tag_name: dev-${{ github.run_number }}
       prerelease: true
 

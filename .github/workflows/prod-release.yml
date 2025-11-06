@@ -14,5 +14,5 @@ jobs:
     uses: ./.github/workflows/build-and-release.yml
     with:
       release_type: prod
-      tag_name: v${{ github.run_number }}
       prerelease: false
+

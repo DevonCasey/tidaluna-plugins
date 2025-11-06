@@ -6,9 +6,6 @@ on:
       release_type:
         required: true
         type: string
-      tag_name:
-        required: true
-        type: string
       prerelease:
         required: true
         type: boolean
@@ -59,12 +56,24 @@ jobs:
           name: luna-artifacts
           path: ./dist/
 
+      - name: determine tag and name
+        id: meta
+        run: |
+          if [ "${{ inputs.release_type }}" = "prod" ]; then
+            echo "tag=latest" >> $GITHUB_OUTPUT
+            echo "name=Release v${{ github.run_number }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=latest-dev" >> $GITHUB_OUTPUT
+            echo "name=Dev Release #${{ github.run_number }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: publish release on github
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.tag_name }}
-          name: "${{ inputs.release_type }} release #${{ github.run_number }}"
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: ${{ steps.meta.outputs.name }}
           prerelease: ${{ inputs.prerelease }}
+          make_latest: true
           files: ./dist/**
           fail_on_unmatched_files: false
 
