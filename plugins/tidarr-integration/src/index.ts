@@ -45,31 +45,40 @@ async function sendToTidarr(mediaItem: any) {
 
     let tidarrItem: any;
 
+    // Check album context
     const isAlbumContext =
       tidalItem.album !== undefined && (mediaItem.trackCount || 0) > 1;
 
     if (isAlbumContext && tidalItem.album) {
-      // Send album object to Tidarr
-      tidarrItem = {
-        id: String(tidalItem.album.id),
-        title: tidalItem.album.title,
-        artist: tidalItem.artists?.[0]?.name || "Unknown Artist",
-        artists: [{ name: tidalItem.artists?.[0]?.name || "Unknown Artist" }],
-        url: tidalItem.album.url || `https://tidal.com/browse/album/${tidalItem.album.id}`,
+      // Construct proper album object for Tidarr
+      const album = tidalItem.album;
+      const mainArtist =
+        tidalItem.artists?.[0]?.name ||
+        "Unknown Artist"; // fallback to first track artist
+      
+      const tidarrAlbumItem = {
+        id: String(album.id),
+        title: album.title,
+        artist: album.artist || tidalItem.artists?.[0]?.name || "Unknown Artist",
+        artists: [{ name: album.artist || tidalItem.artists?.[0]?.name || "Unknown Artist" }],
+        url: album.url,
         type: "album",
         quality,
         status: "queue",
         loading: true,
         error: false,
       };
+      
     } else {
-      // Send track object
+      // Single track
       tidarrItem = {
         id: String(tidalItem.id),
         title: tidalItem.title || "Unknown Title",
         artist: tidalItem.artists?.[0]?.name || "Unknown Artist",
         artists:
-          tidalItem.artists?.map((a: any) => ({ name: a.name })) || [{ name: "Unknown Artist" }],
+          tidalItem.artists?.map((a: any) => ({ name: a.name })) || [
+            { name: "Unknown Artist" },
+          ],
         url:
           tidalItem.url ||
           (tidalItem.album
@@ -133,7 +142,7 @@ ContextMenu.onMediaItem(unloads, async ({ mediaCollection, contextMenu }) => {
     tidarrDownloadButton.text = "Sending to Tidarr...";
 
     try {
-      // Send the first track (which contains album info) for albums, or all tracks individually
+      // Send album as single album object
       if (isAlbumContext) {
         await sendToTidarr(firstTrack);
         tidarrDownloadButton.text = `Sent album to Tidarr!`;
