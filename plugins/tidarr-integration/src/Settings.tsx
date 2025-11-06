@@ -69,7 +69,6 @@ export const Settings = () => {
 
   return (
     <LunaSettings>
-      // tidarr url input
       <LunaTextSetting
         title="Tidarr URL"
         desc="The URL where your Tidarr instance is running (e.g., http://localhost:8484)"
@@ -81,7 +80,6 @@ export const Settings = () => {
         }}
       />
 
-      // admin password input
       <LunaTextSetting
         title="Admin Password"
         desc="Admin password for Tidarr (leave empty if none)"
@@ -94,7 +92,6 @@ export const Settings = () => {
         }}
       />
 
-      // download quality select
       <LunaSelectSetting
         title="Download Quality"
         desc="Quality to request when sending items to Tidarr"
@@ -111,7 +108,6 @@ export const Settings = () => {
         <LunaSelectItem value="master">Master</LunaSelectItem>
       </LunaSelectSetting>
 
-      // debug mode switch
       <LunaSwitchSetting
         title="Debug Mode"
         desc="Enables context menu button for debugging purposes"
@@ -121,9 +117,6 @@ export const Settings = () => {
         }}
       />
 
-      /** 
-      * test tidarr connection button
-      */
       <div style={{ margin: "16px 0", textAlign: "right" }}>
         <button
           onClick={testTidarrConnection}
