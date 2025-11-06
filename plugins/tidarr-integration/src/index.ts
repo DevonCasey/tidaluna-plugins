@@ -96,7 +96,7 @@ async function sendToTidarr(mediaItem: any) {
 }
 
 ContextMenu.onMediaItem(unloads, async ({ mediaCollection, contextMenu }) => {
-  const settings = await getSettings(); // always get the latest settings
+  const settings = await getSettings(); // remember to load settings when context menu starts
   const debugMode = settings.debugMode;
 
   const trackCount = await mediaCollection.count();
