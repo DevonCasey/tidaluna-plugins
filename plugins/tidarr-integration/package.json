@@ -1,7 +1,7 @@
 {
   "name": "tidarr-integration",
   "description": "Sends tracks and albums to Tidarr for download right from TidalLuna.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "license": "MIT",
   "homepage": "https://github.com/DevonCasey/tidal-luna-plugins#tidarr-integration",
   "author": {

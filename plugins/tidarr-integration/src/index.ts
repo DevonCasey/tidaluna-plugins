@@ -15,7 +15,7 @@ async function getSettings() {
   });
 }
 
-// Send a single media item (track or album) to Tidarr
+// Send a media item (track or album) to Tidarr
 async function sendToTidarr(mediaItem: any) {
   const settings = await getSettings();
   const tidarrUrl = settings.tidarrUrl;
@@ -41,20 +41,16 @@ async function sendToTidarr(mediaItem: any) {
     }
 
     const token = (authResponse as any).token;
-
     const tidalItem = mediaItem.tidalItem || mediaItem;
 
-    // Determine if this is an album or track
-    const isAlbumContext =
-      tidalItem.album !== undefined &&
-      (mediaItem.trackCount || 0) > 1;
+    let tidarrItem: any;
 
-    // Prepare Tidarr item(s)
-    let tidarrItems: any[] = [];
+    const isAlbumContext =
+      tidalItem.album !== undefined && (mediaItem.trackCount || 0) > 1;
 
     if (isAlbumContext && tidalItem.album) {
-      // Create a Tidarr album object (Tidarr can process all tracks from album)
-      tidarrItems.push({
+      // Send album object to Tidarr
+      tidarrItem = {
         id: String(tidalItem.album.id),
         title: tidalItem.album.title,
         artist: tidalItem.artists?.[0]?.name || "Unknown Artist",
@@ -65,16 +61,15 @@ async function sendToTidarr(mediaItem: any) {
         status: "queue",
         loading: true,
         error: false,
-      });
+      };
     } else {
-      // Single track
-      tidarrItems.push({
+      // Send track object
+      tidarrItem = {
         id: String(tidalItem.id),
         title: tidalItem.title || "Unknown Title",
         artist: tidalItem.artists?.[0]?.name || "Unknown Artist",
-        artists: tidalItem.artists?.map((a: any) => ({ name: a.name })) || [
-          { name: "Unknown Artist" },
-        ],
+        artists:
+          tidalItem.artists?.map((a: any) => ({ name: a.name })) || [{ name: "Unknown Artist" }],
         url:
           tidalItem.url ||
           (tidalItem.album
@@ -85,29 +80,27 @@ async function sendToTidarr(mediaItem: any) {
         status: "queue",
         loading: true,
         error: false,
-      });
+      };
     }
 
-    // Send each item to Tidarr
-    for (const tidarrItem of tidarrItems) {
-      const response = await ftch.text(`${tidarrUrl}/api/save`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          Origin: tidarrUrl,
-          Referer: `${tidarrUrl}/`,
-        },
-        body: JSON.stringify({ item: tidarrItem }),
-      });
+    // Send to Tidarr
+    const response = await ftch.text(`${tidarrUrl}/api/save`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        Origin: tidarrUrl,
+        Referer: `${tidarrUrl}/`,
+      },
+      body: JSON.stringify({ item: tidarrItem }),
+    });
 
-      if (response === "Created" || response.includes("201")) {
-        trace.msg.log(
-          `Successfully added to Tidarr: "${tidarrItem.title}" by ${tidarrItem.artist}`
-        );
-      } else {
-        trace.msg.err("Unexpected response from Tidarr:", response);
-      }
+    if (response === "Created" || response.includes("201")) {
+      trace.msg.log(
+        `Successfully added to Tidarr: "${tidarrItem.title}" by ${tidarrItem.artist}`
+      );
+    } else {
+      trace.msg.err("Unexpected response from Tidarr:", response);
     }
   } catch (error: any) {
     trace.msg.err("Failed to send to Tidarr:", error.message || error);
@@ -138,15 +131,20 @@ ContextMenu.onMediaItem(unloads, async ({ mediaCollection, contextMenu }) => {
     if (!tidarrDownloadButton.elem) return;
 
     tidarrDownloadButton.text = "Sending to Tidarr...";
-    let successCount = 0;
 
     try {
-      for await (const mediaItem of await mediaCollection.mediaItems()) {
-        await sendToTidarr(mediaItem);
-        successCount++;
+      // Send the first track (which contains album info) for albums, or all tracks individually
+      if (isAlbumContext) {
+        await sendToTidarr(firstTrack);
+        tidarrDownloadButton.text = `Sent album to Tidarr!`;
+      } else {
+        let successCount = 0;
+        for await (const mediaItem of await mediaCollection.mediaItems()) {
+          await sendToTidarr(mediaItem);
+          successCount++;
+        }
+        tidarrDownloadButton.text = `Sent ${successCount} item(s) to Tidarr!`;
       }
-
-      tidarrDownloadButton.text = `Sent ${successCount} item(s) to Tidarr!`;
     } catch (error) {
       trace.msg.err("Error sending to Tidarr:", error);
       tidarrDownloadButton.text = "Failed to send to Tidarr";
@@ -159,7 +157,7 @@ ContextMenu.onMediaItem(unloads, async ({ mediaCollection, contextMenu }) => {
 
   await tidarrDownloadButton.show(contextMenu);
 
-  // Debug button (optional)
+  // Debug button
   if (debugMode) {
     const debugButton = (ContextMenu as any).addButton(unloads);
     debugButton.text = "[DEBUG] Show Media Info";
