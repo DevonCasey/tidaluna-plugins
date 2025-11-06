@@ -38,9 +38,8 @@ jobs:
       tag_name: ${{ needs.read_version.outputs.pkg_version }}
       prerelease: false
       branch: refs/heads/main
-      release_title: "Release ${{ needs.read_version.outputs.pkg_version }}"
+      release_title: "Release v${{ needs.read_version.outputs.pkg_version }}"
       release_body: |
-        Tidarr Integration Plugin
 
         Send tracks and albums from Tidal directly to Tidarr for download.
 
