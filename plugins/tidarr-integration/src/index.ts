@@ -5,6 +5,7 @@ export const { errSignal, trace } = Tracer("[tidarr-integration]");
 export const unloads = new Set<LunaUnload>();
 export { Settings } from "./Settings";
 
+// flexing type safety, because why not
 interface TidalArtist {
   id: number;
   name: string;
