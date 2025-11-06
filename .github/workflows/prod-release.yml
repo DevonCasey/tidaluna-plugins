@@ -8,13 +8,11 @@ on:
     paths-ignore:
       - "**/*.md"
       - ".vscode/**"
-  workflow_dispatch:
 
 jobs:
   call-shared-workflow:
     uses: ./.github/workflows/build-and-release.yml
     with:
       release_type: prod
-      tag_name: latest
+      tag_name: v${{ github.run_number }}
       prerelease: false
-      branch: refs/heads/main

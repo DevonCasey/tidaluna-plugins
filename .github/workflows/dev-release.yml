@@ -15,4 +15,4 @@ jobs:
       release_type: dev
       tag_name: dev-${{ github.run_number }}
       prerelease: true
-      branch: refs/heads/dev
+
