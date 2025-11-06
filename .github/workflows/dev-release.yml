@@ -13,5 +13,12 @@ jobs:
     uses: ./.github/workflows/build-and-release.yml
     with:
       release_type: dev
+      tag_name: dev-${{ github.run_number }}
       prerelease: true
+      branch: refs/heads/dev
+      release_title: "Dev Release #${{ github.run_number }}"
+      release_body: |
+        dev build (pre-release)
 
+        Don't use me if you don't know what you're doing!
+      latest_tag: latest-dev

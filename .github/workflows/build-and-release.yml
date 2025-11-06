@@ -6,74 +6,111 @@ on:
       release_type:
         required: true
         type: string
+      tag_name:
+        required: true
+        type: string
       prerelease:
         required: true
         type: boolean
+      branch:
+        required: true
+        type: string
+      release_title:
+        required: true
+        type: string
+      release_body:
+        required: true
+        type: string
+      latest_tag:
+        required: true
+        type: string
 
 jobs:
   build:
-    name: build plugin
+    name: build
     runs-on: ubuntu-latest
-    
-    steps:
-      - name: checkout code
-        uses: actions/checkout@v4
 
-      - name: install pnpm
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Needed for changelog generation
+
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: latest
 
-      - name: install node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          cache: pnpm
           node-version: latest
+          cache: pnpm
 
-      - name: install dependencies
+      - name: Install dependencies
         run: pnpm install
 
-      - name: build plugin
+      - name: Build plugin
         run: pnpm run build
 
-      - name: upload build artifacts
+      # 🔥 Generate changelog using conventional commits
+      - name: Generate changelog
+        run: |
+          pnpm dlx conventional-changelog -p angular -i CHANGELOG.md -s
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "chore: update changelog" || echo "No changes to commit"
+
+      - name: Push changelog commit
+        if: github.ref == inputs.branch
+        run: |
+          git push origin HEAD:${{ inputs.branch }}
+
+      - name: Package plugin
+        run: |
+          mkdir -p dist
+          cp -r plugins/tidarr-integration/dist/* dist/ || true
+          cp plugins/tidarr-integration/store.json dist/ || true
+
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: luna-artifacts
           path: ./dist
 
   release:
-    name: publish release
+    name: release
     needs: build
     runs-on: ubuntu-latest
+    if: github.ref == inputs.branch
     permissions:
       contents: write
 
     steps:
-      - name: download artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           name: luna-artifacts
           path: ./dist/
 
-      - name: determine tag and name
-        id: meta
-        run: |
-          if [ "${{ inputs.release_type }}" = "prod" ]; then
-            echo "tag=latest" >> $GITHUB_OUTPUT
-            echo "name=Release v${{ github.run_number }}" >> $GITHUB_OUTPUT
-          else
-            echo "tag=latest-dev" >> $GITHUB_OUTPUT
-            echo "name=Dev Release #${{ github.run_number }}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: publish release on github
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.meta.outputs.tag }}
-          name: ${{ steps.meta.outputs.name }}
+          tag_name: ${{ inputs.tag_name }}
+          name: ${{ inputs.release_title }}
+          body: |
+            ${{ inputs.release_body }}
+
+            ---
+            See full changelog below:
+            https://github.com/${{ github.repository }}/blob/${{ inputs.branch }}/CHANGELOG.md
           prerelease: ${{ inputs.prerelease }}
-          make_latest: true
           files: ./dist/**
-          fail_on_unmatched_files: false
+
+      - name: Update "latest" tag
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
+        run: |
+          git tag -f ${{ inputs.latest_tag }} ${{ inputs.tag_name }}
+          git push origin ${{ inputs.latest_tag }} --force
 
