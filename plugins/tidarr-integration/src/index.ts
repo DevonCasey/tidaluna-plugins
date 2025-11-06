@@ -149,7 +149,7 @@ ContextMenu.onMediaItem(unloads, async ({ mediaCollection, contextMenu }) => {
   // only show debug button if debugMode is true
   if (debugMode) {
     const debugButton = (ContextMenu as any).addButton(unloads);
-    debugButton.text = "Show Tidarr Item Info";
+    debugButton.text = "[DEBUG] Show Media Info";
 
     debugButton.onClick(async () => {
       const win = window.open("", "Tidarr Item Info", "width=500,height=400,resizable");
