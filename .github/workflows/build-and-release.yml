@@ -1,0 +1,76 @@
+name: build and release
+
+on:
+  workflow_call:
+    inputs:
+      release_type:
+        required: true
+        type: string
+      tag_name:
+        required: true
+        type: string
+      prerelease:
+        required: true
+        type: boolean
+      branch:
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: install Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: latest
+
+      - name: install dependencies
+        run: pnpm install
+
+      - name: build plugin
+        run: pnpm run build
+
+      - name: package plugin
+        run: pnpm run package
+
+      - name: upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: luna-artifacts
+          path: ./dist
+
+  release:
+    name: release
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == inputs.branch
+    permissions:
+      contents: write
+
+    steps:
+      - name: download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: luna-artifacts
+          path: ./dist/
+
+      - name: publish release on github
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag_name }}
+          name: "${{ inputs.release_type }} Release ${{ github.run_number }}"
+          prerelease: ${{ inputs.prerelease }}
+          files: ./dist/**
+          fail_on_unmatched_files: false
