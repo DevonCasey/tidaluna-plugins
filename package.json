@@ -1,8 +1,12 @@
 {
 	"name": "@devoncasey/tidalluna-plugins",
 	"description": "A collection of plugins for TidalLuna.",
-	"author": "Devon Casey",
-	"repository": {
+	"author": {
+    "name": "Devon Casey",
+    "url": "https://github.com/DevonCasey",
+    "avatarUrl": "https://0.gravatar.com/avatar/4f20153247cc8c6c0868d779e8a8ae0593bb9641880886280281f7de135edc9f"
+  },
+  "repository": {
 		"type": "git",
 		"url": "https://github.com/DevonCasey/TidalLuna-Plugins.git"
 	},

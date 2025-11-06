@@ -1,0 +1,34 @@
+name: main release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'plugins/tidarr-integration/**'
+      - 'plugins/**'
+
+jobs:
+  call-shared-workflow:
+    uses: ./.github/workflows/build-and-release.yml
+    with:
+      release_type: stable
+      tag_name: v${{ github.run_number }}
+      prerelease: false
+      branch: refs/heads/main
+      release_title: "Release v${{ github.run_number }}"
+      release_body: |
+        Tidarr Integration Plugin
+
+        Send tracks and albums from Tidal directly to Tidarr for download.
+
+        ### Installation
+        1. Open **TidalLuna**
+        2. Go to **Settings → Plugins**
+        3. Click **"Install from URL"**
+        4. Paste this URL:
+           ```
+           https://github.com/DevonCasey/tidal-luna-plugins/releases/download/latest/store.json
+           ```
+      latest_tag: latest
+

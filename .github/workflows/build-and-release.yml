@@ -1,73 +1,84 @@
-name: "Build and Release"
+name: build and release
 
 on:
-  push:
-    branches: [ main, master ]
-    paths-ignore:
-      - "**/*.md"
-      - ".vscode/**"
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      release_type:
+        required: true
+        type: string
+      tag_name:
+        required: true
+        type: string
+      prerelease:
+        required: true
+        type: boolean
+      branch:
+        required: true
+        type: string
+      release_title:
+        required: true
+        type: string
+      release_body:
+        required: true
+        type: string
+      latest_tag:
+        required: false
+        type: string
 
 jobs:
-  Build:
-    name: Build
+  build:
+    name: build
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Install pnpm
-      uses: pnpm/action-setup@v4
-      with:
-        version: latest
-        
-    - name: Install Node.js
-      uses: actions/setup-node@v4
-      with:
-        cache: pnpm
-        node-version: latest
-      
-    - name: Install dependencies
-      run: pnpm install
-      
-    - name: Build
-      run: pnpm run build
-      
-    - name: Upload Build Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: luna-artifacts
-        path: ./dist
-        
-  Release:
-    name: Release latest on GitHub
-    needs: Build
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: install Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: latest
+
+      - name: install dependencies
+        run: pnpm install
+
+      - name: build plugin
+        run: pnpm run build
+
+      - name: upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: luna-artifacts
+          path: ./dist
+
+  release:
+    name: release
+    needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    if: github.ref == inputs.branch
     permissions:
       contents: write
-      
+
     steps:
-    - name: Download All Artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: luna-artifacts
-        path: ./dist/
-        
-    - name: Publish latest release on GitHub
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: latest
-        name: "Release v${{ github.run_number }}"
-        body: |
-          ## Tidarr Integration Plugin
+      - name: download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: luna-artifacts
+          path: ./dist/
 
-          Send tracks and albums from Tidal directly to Tidarr for download.
+      - name: publish release on github
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.latest_tag || inputs.tag_name }}
+          name: ${{ inputs.release_title }}
+          body: ${{ inputs.release_body }}
+          prerelease: ${{ inputs.prerelease }}
+          files: ./dist/**
+          fail_on_unmatched_files: false
 
-          ### Installation
-          1. Open TidalLuna
-          2. Go to Settings → Plugins  
-          3. Click "Install from URL"
-          4. Paste: `https://github.com/DevonCasey/tidal-luna-plugins/releases/download/latest/store.json`
-        files: ./dist/**
-        fail_on_unmatched_files: false
