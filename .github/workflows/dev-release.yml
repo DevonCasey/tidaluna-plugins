@@ -18,8 +18,7 @@ jobs:
       branch: refs/heads/dev
       release_title: "Dev Release #${{ github.run_number }}"
       release_body: |
-        Dev Release #${{ github.run_number }}
-        Tidarr Integration Plugin (Dev Build)
+        Tidarr Integration Plugin
 
         Send tracks and albums from Tidal directly to Tidarr for download.
 
