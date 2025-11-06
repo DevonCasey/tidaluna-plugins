@@ -1,6 +1,6 @@
 {
   "name": "tidarr-integration",
-  "description": "Send tracks and albums to Tidarr for download right from TidalLuna.",
+  "description": "Sends tracks and albums to Tidarr for download right from TidalLuna.",
   "homepage": "https://github.com/DevonCasey/tidal-luna-plugins#tidarr-integration",
   "author": {
     "name": "Devon Casey",
