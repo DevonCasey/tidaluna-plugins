@@ -45,12 +45,12 @@ jobs:
         Send tracks and albums from Tidal directly to Tidarr for download.
 
         ### Installation
-        1. Open **TidalLuna**
-        2. Go to **Settings → Plugins**
-        3. Click **"Install from URL"**
-        4. Paste this URL:
-           ```
-           https://github.com/DevonCasey/tidal-luna-plugins/releases/download/latest/store.json
-           ```
-      latest_tag: latest
+        1. Open **TidaLuna**
+              2. Go to **Settings → Plugins**
+              3. Click **"Install from URL"**
+              4. Paste this URL:
+                ```
+                https://github.com/DevonCasey/tidaluna-plugins/releases/download/latest/store.json
+                ```
+            latest_tag: latest
 

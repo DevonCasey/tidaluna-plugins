@@ -54,11 +54,11 @@ export const Settings = () => {
     setTestResult(null);
 
     try {
-      const isAuthActiveRes = await ftch.json(`${tidarrUrl}/api/is_auth_active`) as IsAuthActiveResponse;
+      const isAuthActiveRes = await ftch.json<{ isAuthActive: boolean }>(`${tidarrUrl}/api/is_auth_active`);
       const isAuthActive = isAuthActiveRes?.isAuthActive ?? false;
 
       if (isAuthActive) {
-        const authResponse = await ftch.json(`${tidarrUrl}/api/auth`, {
+        const authResponse = await ftch.json<{ token?: string }>(`${tidarrUrl}/api/auth`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ password: adminPassword || "" }),
@@ -92,6 +92,7 @@ export const Settings = () => {
           setTidarrUrl(newValue);
           settings.tidarrUrl = newValue;
         }}
+        style={{ maxWidth: "500px", marginLeft: "auto" }}
       />
 
       <LunaTextSetting
@@ -104,6 +105,7 @@ export const Settings = () => {
           setAdminPassword(newValue);
           settings.adminPassword = newValue;
         }}
+        style={{ maxWidth: "200px", marginLeft: "auto" }}
       />
 
       <LunaSelectSetting
@@ -115,6 +117,7 @@ export const Settings = () => {
           setDownloadQuality(newValue);
           settings.downloadQuality = newValue;
         }}
+        style={{ maxWidth: "100px", marginLeft: "auto" }}
       >
         <LunaSelectItem value="low">Low</LunaSelectItem>
         <LunaSelectItem value="normal">Normal</LunaSelectItem>
@@ -125,10 +128,12 @@ export const Settings = () => {
       <LunaSwitchSetting
         title="Debug Mode"
         desc="Enables context menu button for debugging purposes"
-        checked={debugMode}
-        onChange={(_: any, checked: boolean) => {
-          setDebugMode(checked);
-          settings.debugMode = checked;
+        // currently commented out due to typing issues in TidaLuna
+        // checked={debugMode}
+        {...({ checked: debugMode } as any)}
+        onChange={(_event: React.ChangeEvent<HTMLInputElement>, nextChecked: boolean) => {
+          setDebugMode(nextChecked);
+          settings.debugMode = nextChecked;
         }}
       />
 

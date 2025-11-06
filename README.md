@@ -1,6 +1,6 @@
-# TidalLuna Plugins
+# TidaLuna Plugins
 
-A collection of TidalLuna plugins. Well, the one plugin.
+A collection of TidaLuna plugins. Well, the one plugin.
 
 ## Tidarr Integration
 
@@ -12,7 +12,7 @@ Right-click on any track or album in Tidal and send it to Tidarr for download. S
 
 ### Requirements
 
-- [TidalLuna](https://github.com/Inrixia/TidaLuna) installed
+- [TidaLuna](https://github.com/Inrixia/TidaLuna) installed
 - [Tidarr](https://github.com/cstaelen/tidarr) is accessible somewhere on your network
 - An active Tidal subscription
 
@@ -20,10 +20,10 @@ Right-click on any track or album in Tidal and send it to Tidarr for download. S
 
 This will add this repo as a source for plugins that will appear in the store to download.
 
-1. Open Tidal with TidalLuna
+1. Open Tidal with TidaLuna
 2. Go to **Settings** > **Plugins**
 3. Click **Install from URL**
-4. Paste: `https://github.com/DevonCasey/tidal-luna-plugins/releases/download/latest/store.json`
+4. Paste: `https://github.com/DevonCasey/tidaluna-plugins/releases/download/latest/store.json`
 
 Navigate to the **Plugin Store** and download away!
 
@@ -72,8 +72,8 @@ curl -X GET "$TIDARR_URL/api/is_auth_active"
 For local development:
 
 ```bash
-git clone https://github.com/DevonCasey/tidal-luna-plugins.git
-cd tidal-luna-plugins
+git clone https://github.com/DevonCasey/tidaluna-plugins.git
+cd tidaluna-plugins
 corepack enable
 corepack prepare pnpm@latest --activate
 pnpm install
@@ -85,5 +85,3 @@ The local repo will then appear in the **Plugin Store**, select what you want to
 ## Credits
 
 - Lovingly inspired by the SongDownloader plugin written by [Inrixia](https://github.com/Inrixia/luna-plugins/tree/master/plugins/SongDownloader)
-
-<small>Built for [TidalLuna](https://github.com/Inrixia/TidaLuna) and [Tidarr](https://github.com/cstaelen/tidarr).</small>
