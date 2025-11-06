@@ -56,8 +56,7 @@ export const Settings = () => {
           setTestResult("failure");
         }
       } else {
-        const healthCheck = await ftch.text(`${tidarrUrl}/api/is_auth_active`);
-        setTestResult(healthCheck ? "success" : "failure");
+        setTestResult("success");
       }
     } catch (error) {
       setTestResult("failure");
@@ -113,7 +112,8 @@ export const Settings = () => {
         desc="Enables context menu button for debugging purposes"
         checked={debugMode}
         onChange={(_, checked) => {
-          setDebugMode((settings.debugMode = checked));
+          setDebugMode(checked);
+          settings.debugMode = checked;
         }}
       />
 

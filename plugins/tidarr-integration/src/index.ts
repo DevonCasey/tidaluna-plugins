@@ -1,6 +1,5 @@
 import { Tracer, type LunaUnload, ReactiveStore, ftch } from "@luna/core";
 import { ContextMenu } from "@luna/lib";
-import { Settings } from "./Settings";
 
 export const { errSignal, trace } = Tracer("[tidarr-integration]");
 export const unloads = new Set<LunaUnload>();
@@ -8,7 +7,11 @@ export { Settings } from "./Settings";
 
 // loads from saved settings from plugin storage when you call it
 async function getSettings() {
-  return await ReactiveStore.getPluginStorage<any>("tidarr-integration", {});
+  return await ReactiveStore.getPluginStorage<any>("tidarr-integration", { 
+    tidarrUrl: "", 
+    adminPassword: "", 
+    downloadQuality: "high", 
+    debugMode: false });
 }
 
 async function sendToTidarr(mediaItem: any) {
@@ -17,8 +20,8 @@ async function sendToTidarr(mediaItem: any) {
   const adminPassword = settings.adminPassword;
   const quality = settings.downloadQuality || "high";
 
-  if (!tidarrUrl || !adminPassword) {
-    trace.msg.err("Tidarr URL or admin password not configured in settings");
+  if (!tidarrUrl) {
+    trace.msg.err("Tidarr URL not configured in settings");
     return;
   }
 
@@ -153,7 +156,10 @@ ContextMenu.onMediaItem(unloads, async ({ mediaCollection, contextMenu }) => {
       if (win) {
         const info = firstTrack;
         win.document.title = "Tidarr Item Info";
-        win.document.body.innerHTML = `<pre>${JSON.stringify(info, null, 2)}</pre>`;
+        const pre = win.document.createElement("pre");
+        pre.textContent = JSON.stringify(info, null, 2);
+        win.document.body.innerHTML = "";
+        win.document.body.appendChild(pre);
       }
     });
 
