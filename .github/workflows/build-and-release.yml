@@ -42,9 +42,6 @@ jobs:
       - name: build plugin
         run: pnpm run build
 
-      - name: package plugin
-        run: pnpm run package
-
       - name: upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -55,7 +52,7 @@ jobs:
     name: release
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == inputs.branch
+    if: github.ref == format('refs/heads/{0}', inputs.branch)
     permissions:
       contents: write
 
@@ -74,3 +71,4 @@ jobs:
           prerelease: ${{ inputs.prerelease }}
           files: ./dist/**
           fail_on_unmatched_files: false
+

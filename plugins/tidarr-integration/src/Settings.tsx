@@ -15,7 +15,7 @@ type PluginSettings = {
   debugMode: boolean;
 };
 
-// Load settings once and keep a single reactive object
+// load settings once and keep a single reactive object
 export const settings = await ReactiveStore.getPluginStorage<PluginSettings>(
   "tidarr-integration",
   {
@@ -34,7 +34,7 @@ export const Settings = () => {
   const [testing, setTesting] = React.useState(false);
   const [testResult, setTestResult] = React.useState<string | null>(null);
 
-  // Test Tidarr connection logic
+  // test tidarr connection logic
   const testTidarrConnection = async () => {
     setTesting(true);
     setTestResult(null);
@@ -69,6 +69,7 @@ export const Settings = () => {
 
   return (
     <LunaSettings>
+      // tidarr url input
       <LunaTextSetting
         title="Tidarr URL"
         desc="The URL where your Tidarr instance is running (e.g., http://localhost:8484)"
@@ -80,6 +81,7 @@ export const Settings = () => {
         }}
       />
 
+      // admin password input
       <LunaTextSetting
         title="Admin Password"
         desc="Admin password for Tidarr (leave empty if none)"
@@ -92,6 +94,7 @@ export const Settings = () => {
         }}
       />
 
+      // download quality select
       <LunaSelectSetting
         title="Download Quality"
         desc="Quality to request when sending items to Tidarr"
@@ -108,6 +111,7 @@ export const Settings = () => {
         <LunaSelectItem value="master">Master</LunaSelectItem>
       </LunaSelectSetting>
 
+      // debug mode switch
       <LunaSwitchSetting
         title="Debug Mode"
         desc="Enables context menu button for debugging purposes"
@@ -117,7 +121,9 @@ export const Settings = () => {
         }}
       />
 
-      {/* Test Tidarr Connection button */}
+      /** 
+      * test tidarr connection button
+      */
       <div style={{ margin: "16px 0", textAlign: "right" }}>
         <button
           onClick={testTidarrConnection}

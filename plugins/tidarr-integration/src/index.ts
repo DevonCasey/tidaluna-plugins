@@ -6,7 +6,7 @@ export const { errSignal, trace } = Tracer("[tidarr-integration]");
 export const unloads = new Set<LunaUnload>();
 export { Settings } from "./Settings";
 
-// Helper to always get the latest settings
+// loads from saved settings from plugin storage when you call it
 async function getSettings() {
   return await ReactiveStore.getPluginStorage<any>("tidarr-integration", {});
 }
@@ -121,7 +121,7 @@ ContextMenu.onMediaItem(unloads, async ({ mediaCollection, contextMenu }) => {
 
     try {
       if (isAlbumContext) {
-        await sendToTidarr(firstTrack);
+        await sendToTidarr(firstTrack); // send the first track which contains album info
         tidarrDownloadButton.text = `Sent album to Tidarr!`;
       } else {
         let successCount = 0;
@@ -143,7 +143,7 @@ ContextMenu.onMediaItem(unloads, async ({ mediaCollection, contextMenu }) => {
 
   await tidarrDownloadButton.show(contextMenu);
 
-  // Only show debug button if debugMode is true
+  // only show debug button if debugMode is true
   if (debugMode) {
     const debugButton = (ContextMenu as any).addButton(unloads);
     debugButton.text = "Show Tidarr Item Info";
@@ -160,4 +160,3 @@ ContextMenu.onMediaItem(unloads, async ({ mediaCollection, contextMenu }) => {
     await debugButton.show(contextMenu);
   }
 });
-
