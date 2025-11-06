@@ -1,9 +1,13 @@
 {
   "name": "tidarr-integration",
-  "description": "Send tracks and albums to Tidarr for download right from TidalLuna.",
+  "description": "Sends tracks and albums to Tidarr for download right from TidalLuna.",
+  "version": "1.0.0",
+  "license": "MIT",
+  "homepage": "https://github.com/DevonCasey/tidal-luna-plugins#tidarr-integration",
   "author": {
     "name": "Devon Casey",
-    "url": "https://github.com/DevonCasey"
+    "url": "https://github.com/DevonCasey",
+    "avatarUrl": "https://0.gravatar.com/avatar/4f20153247cc8c6c0868d779e8a8ae0593bb9641880886280281f7de135edc9f"
   },
   "main": "./src/index.ts"
 }

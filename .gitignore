@@ -40,3 +40,6 @@ temp/
 
 # Example (development reference)
 example
+
+# Backup stuff
+*.bak
