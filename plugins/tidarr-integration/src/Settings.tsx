@@ -42,16 +42,19 @@ export const Settings = () => {
   const [debugMode, setDebugMode] = React.useState(settings.debugMode);
   const [testing, setTesting] = React.useState(false);
   const [testResult, setTestResult] = React.useState<"success" | "failure" | null>(null);
+  const [testError, setTestError] = React.useState<string | null>(null);
 
   const testTidarrConnection = async () => {
     if (!tidarrUrl.trim()) {
       setTestResult("failure");
-      setTimeout(() => setTestResult(null), 3000);
+      setTestError("No Tidarr URL provided.");
+      setTimeout(() => { setTestResult(null); setTestError(null); }, 3000);
       return;
     }
 
     setTesting(true);
     setTestResult(null);
+    setTestError(null);
 
     try {
       const isAuthActiveRes = await ftch.json<{ isAuthActive: boolean }>(`${tidarrUrl}/api/is_auth_active`);
@@ -68,16 +71,18 @@ export const Settings = () => {
           setTestResult("success");
         } else {
           setTestResult("failure");
+          setTestError("Authentication failed: No token returned.");
         }
       } else {
         setTestResult("success");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Tidarr connection test failed:", error);
       setTestResult("failure");
+      setTestError(error?.message || String(error));
     } finally {
       setTesting(false);
-      setTimeout(() => setTestResult(null), 3000);
+      setTimeout(() => { setTestResult(null); setTestError(null); }, 5000);
     }
   };
 
@@ -85,7 +90,7 @@ export const Settings = () => {
     <LunaSettings>
       <LunaTextSetting
         title="Tidarr URL"
-        desc="The URL where your Tidarr instance is running (e.g., http://localhost:8484)"
+        desc="The URL where your Tidarr instance is running. REQUIRES HTTPS (e.g., https://tidarr.example.com)"
         value={tidarrUrl}
         onChange={(e: any) => {
           const newValue = e.target.value;
@@ -170,6 +175,11 @@ export const Settings = () => {
             ? "\u2716 Connection Failed"
             : "Test Tidarr Connection"}
         </button>
+        {testResult === "failure" && testError && (
+          <div style={{ color: "#dc3545", marginTop: "8px", fontSize: "13px", textAlign: "right" }}>
+            Error: {testError}
+          </div>
+        )}
       </div>
     </LunaSettings>
   );
