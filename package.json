@@ -1,6 +1,6 @@
 {
 	"name": "@devoncasey/tidaluna-plugins",
-	"description": "A collection of plugins for TidaLuna.",
+	"description": "A collection of one plugin for TidaLuna.",
 	"author": {
 		"name": "Devon Casey",
 		"url": "https://github.com/DevonCasey",
@@ -28,6 +28,6 @@
 		"typescript": "^5.8.3"
 	},
 	"dependencies": {
-		"luna": "github:Inrixia/TidaLuna#81369c7"
+		"luna": "github:Inrixia/TidaLuna"
 	}
 }
