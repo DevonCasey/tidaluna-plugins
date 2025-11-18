@@ -11,7 +11,7 @@ import React from "react";
 type PluginSettings = {
   tidarrUrl: string;
   adminPassword: string;
-  downloadQuality: "low" | "normal" | "high" | "master";
+  downloadQuality: "low" | "normal" | "high" | "max";
   debugMode: boolean;
 };
 
@@ -127,7 +127,7 @@ export const Settings = () => {
         <LunaSelectItem value="low">Low</LunaSelectItem>
         <LunaSelectItem value="normal">Normal</LunaSelectItem>
         <LunaSelectItem value="high">High</LunaSelectItem>
-        <LunaSelectItem value="master">Master</LunaSelectItem>
+        <LunaSelectItem value="max">Max</LunaSelectItem>
       </LunaSelectSetting>
 
       <LunaSwitchSetting
