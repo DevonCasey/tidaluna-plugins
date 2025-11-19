@@ -43,6 +43,9 @@ export const Settings = () => {
   const [testing, setTesting] = React.useState(false);
   const [testResult, setTestResult] = React.useState<"success" | "failure" | null>(null);
   const [testError, setTestError] = React.useState<string | null>(null);
+  const [rawResponseInfo, setRawResponseInfo] = React.useState<string | null>(null);
+  const [lastTestedUrl, setLastTestedUrl] = React.useState<string | null>(null);
+  const [actualRequestUrl, setActualRequestUrl] = React.useState<string | null>(null);
 
   const testTidarrConnection = async () => {
     if (!tidarrUrl.trim()) {
@@ -57,24 +60,27 @@ export const Settings = () => {
     setTestError(null);
 
     try {
-      const isAuthActiveRes = await ftch.json<{ isAuthActive: boolean }>(`${tidarrUrl}/api/is_auth_active`);
-      const isAuthActive = isAuthActiveRes?.isAuthActive ?? false;
-
-      if (isAuthActive) {
-        const authResponse = await ftch.json<{ token?: string }>(`${tidarrUrl}/api/auth`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password: adminPassword || "" }),
-        }) as TidarrAuthResponse;
-
-        if (authResponse?.token) {
-          setTestResult("success");
-        } else {
-          setTestResult("failure");
-          setTestError("Authentication failed: No token returned.");
-        }
-      } else {
+      // Only test the auth endpoint
+      const authResp = await fetch(`${tidarrUrl}/api/auth`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({ password: adminPassword || "" }),
+      });
+      const authText = await authResp.text();
+      let authResponse;
+      try {
+        authResponse = JSON.parse(authText);
+      } catch (e) {
+        throw new SyntaxError('Auth response is not valid JSON');
+      }
+      if (authResponse?.token) {
         setTestResult("success");
+      } else {
+        setTestResult("failure");
+        setTestError("Authentication failed: No token returned.");
       }
     } catch (error: any) {
       console.error("Tidarr connection test failed:", error);
