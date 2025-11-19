@@ -81,4 +81,11 @@ jobs:
           prerelease: ${{ inputs.prerelease }}
           files: ./dist/**
           fail_on_unmatched_files: false
-
+      
+      - name: update latest tag
+        if: inputs.latest_tag != '' && inputs.latest_tag != inputs.tag_name
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -f ${{ inputs.latest_tag }}
+          git push origin ${{ inputs.latest_tag }} --force
