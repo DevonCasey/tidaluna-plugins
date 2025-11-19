@@ -60,27 +60,72 @@ export const Settings = () => {
     setTestError(null);
 
     try {
-      // Only test the auth endpoint
-      const authResp = await fetch(`${tidarrUrl}/api/auth`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-        body: JSON.stringify({ password: adminPassword || "" }),
+      // Step 1: Check if authentication is active
+      const isAuthActiveResp = await fetch(`${tidarrUrl}/api/is-auth-active`, {
+        method: "GET",
+        headers: { "Accept": "application/json" },
       });
-      const authText = await authResp.text();
-      let authResponse;
-      try {
-        authResponse = JSON.parse(authText);
-      } catch (e) {
-        throw new SyntaxError('Auth response is not valid JSON');
+      const isAuthActiveJson = await isAuthActiveResp.json();
+      const isAuthActive = isAuthActiveJson?.isAuthActive;
+
+      if (!adminPassword) {
+        // No password provided, just check if api is accessible
+        const settingsResp = await fetch(`${tidarrUrl}/api/settings`, {
+          method: "GET",
+          headers: { "Accept": "application/json" },
+        });
+        if (settingsResp.ok) {
+          setTestResult("success");
+        } else {
+          setTestResult("failure");
+          setTestError("Are you sure there is no password? Status: " + settingsResp.status);
+        }
+        return;
       }
-      if (authResponse?.token) {
-        setTestResult("success");
+
+      // If password provided and auth is active, try to get token
+      if (isAuthActive) {
+        const authResp = await fetch(`${tidarrUrl}/api/auth`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+          },
+          body: JSON.stringify({ password: adminPassword }),
+        });
+        const authJson = await authResp.json();
+        const token = authJson?.token;
+        if (!token) {
+          setTestResult("failure");
+          setTestError("Authentication failed: No token returned.");
+          return;
+        }
+        // Use token to access /api/settings
+        const settingsResp = await fetch(`${tidarrUrl}/api/settings`, {
+          method: "GET",
+          headers: {
+            "Accept": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+        if (settingsResp.ok) {
+          setTestResult("success");
+        } else {
+          setTestResult("failure");
+          setTestError("Authenticated, but something went wrong. Status: " + settingsResp.status);
+        }
       } else {
-        setTestResult("failure");
-        setTestError("Authentication failed: No token returned.");
+        // Auth not active, just check /api/settings
+        const settingsResp = await fetch(`${tidarrUrl}/api/settings`, {
+          method: "GET",
+          headers: { "Accept": "application/json" },
+        });
+        if (settingsResp.ok) {
+          setTestResult("success");
+        } else {
+          setTestResult("failure");
+          setTestError("Check if there is a password configured. Status: " + settingsResp.status);
+        }
       }
     } catch (error: any) {
       console.error("Tidarr connection test failed:", error);

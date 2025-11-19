@@ -103,96 +103,158 @@ async function sendToTidarr(mediaItem: any, asAlbum = false): Promise<void> {
   }
 
   try {
-    const authResponse = await ftch.json(`${tidarrUrl}/api/auth`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: adminPassword }),
-    }) as TidarrAuthResponse;
-
-    if (!authResponse.accessGranted || !authResponse.token) {
-      trace.msg.err("Failed to authenticate with Tidarr");
-      return;
+    // Authenticate if password is set
+    let token: string | undefined;
+    // authenticate if password is set
+    if (adminPassword) {
+      const authResponse = await ftch.json(`${tidarrUrl}/api/auth`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: adminPassword }),
+      }) as TidarrAuthResponse;
+      // token is required for authenticated requests
+      if (!authResponse.token) {
+        trace.msg.err("failed to authenticate with tidarr");
+        return;
+      }
+      token = authResponse.token;
     }
 
-    const { token } = authResponse;
+    // use mediaitem.type if present, otherwise infer from context
     const tidalItem: TidalItem = mediaItem.tidalItem || mediaItem;
-
-    let tidarrItem: TidarrItem;
-
-    if (asAlbum && tidalItem.album) {
-      const album = tidalItem.album;
-      
-      if (!album.id) {
-        trace.msg.err("Album ID is missing, cannot send to Tidarr");
-        return;
-      }
-      
-      const albumUrl = album.url || `https://tidal.com/browse/album/${album.id}`;
-      
-      if (!albumUrl.startsWith('http')) {
-        trace.msg.err(`Invalid album URL: ${albumUrl}`);
-        return;
-      }
-      
-      tidarrItem = {
-        id: String(album.id),
-        title: album.title || "Unknown Album",
-        artist: tidalItem.artists?.[0]?.name || "Unknown Artist",
-        type: "album",
-        quality,
-        status: "queue",
-        loading: true,
-        error: false,
-        url: albumUrl,
-      };
-    } else {
-      const trackUrl = tidalItem.url || 
-        (tidalItem.album 
-          ? `https://tidal.com/browse/album/${tidalItem.album.id}/track/${tidalItem.id}`
-          : `https://tidal.com/browse/track/${tidalItem.id}`);
-      
-      if (!trackUrl.startsWith('http')) {
-        trace.msg.err(`Invalid track URL: ${trackUrl}`);
-        return;
-      }
-      
-      tidarrItem = {
-        id: String(tidalItem.id),
-        title: tidalItem.title || "Unknown Track",
-        artist: tidalItem.artists?.[0]?.name || "Unknown Artist",
-        type: "track",
-        quality,
-        status: "queue",
-        loading: true,
-        error: false,
-        url: trackUrl,
-      };
+    let detectedType: string = "track";
+    if (mediaItem.type) {
+      detectedType = mediaItem.type;
+    } else if (asAlbum && tidalItem.album) {
+      detectedType = "album";
     }
+
+    let itemType: string = detectedType;
+    let itemUrl: string | undefined;
+    let item: any = { status: "queue" };
+
+    // map type to correct url format and collect metadata
+    switch (itemType) {
+      case "album": {
+        const album = tidalItem.album || tidalItem;
+        itemUrl = album.url || `https://listen.tidal.com/album/${album.id}`;
+        item.type = "album";
+        item.url = itemUrl;
+        item.title = album.title;
+        // album artist: use tidalItem.artists if available
+        item.artist = Array.isArray(tidalItem.artists) && tidalItem.artists.length > 0 ? tidalItem.artists[0].name : undefined;
+        item.quality = mediaItem.quality || "max";
+        // album date: use tidalItem.album?.releaseDate if available
+        item.date = tidalItem.album?.releaseDate;
+        item.track_number = typeof tidalItem.trackNumber === "number" ? tidalItem.trackNumber : undefined;
+        item.item = {
+          title: tidalItem.title,
+          artist: Array.isArray(tidalItem.artists) && tidalItem.artists.length > 0 ? tidalItem.artists[0].name : undefined,
+          track_number: typeof tidalItem.trackNumber === "number" ? tidalItem.trackNumber : undefined,
+        };
+        break;
+      }
+      case "track": {
+        itemUrl = tidalItem.url || `https://listen.tidal.com/track/${tidalItem.id}`;
+        item.type = "track";
+        item.url = itemUrl;
+        item.title = tidalItem.title;
+        item.artist = Array.isArray(tidalItem.artists) && tidalItem.artists.length > 0 ? tidalItem.artists[0].name : undefined;
+        item.quality = mediaItem.quality || "max";
+        item.album = tidalItem.album?.title;
+        item.date = tidalItem.album?.releaseDate;
+        item.track_number = typeof tidalItem.trackNumber === "number" ? tidalItem.trackNumber : undefined;
+        break;
+      }
+      case "video": {
+        itemUrl = tidalItem.url || `https://listen.tidal.com/video/${tidalItem.id}`;
+        item.type = "video";
+        item.url = itemUrl;
+        item.title = tidalItem.title;
+        item.artist = Array.isArray(tidalItem.artists) && tidalItem.artists.length > 0 ? tidalItem.artists[0].name : undefined;
+        item.quality = mediaItem.quality || "fhd";
+        item.album = tidalItem.album?.title;
+        item.date = tidalItem.album?.releaseDate;
+        break;
+      }
+      case "playlist": {
+        itemUrl = tidalItem.url || `https://listen.tidal.com/playlist/${tidalItem.id}`;
+        item.type = "playlist";
+        item.url = itemUrl;
+        item.title = tidalItem.title;
+        item.artist = Array.isArray(tidalItem.artists) && tidalItem.artists.length > 0 ? tidalItem.artists[0].name : undefined;
+        item.quality = mediaItem.quality || "max";
+        break;
+      }
+      case "mix": {
+        itemUrl = tidalItem.url || `https://listen.tidal.com/mix/${tidalItem.id}`;
+        item.type = "mix";
+        item.url = itemUrl;
+        item.title = tidalItem.title;
+        item.artist = Array.isArray(tidalItem.artists) && tidalItem.artists.length > 0 ? tidalItem.artists[0].name : undefined;
+        item.quality = mediaItem.quality || "max";
+        break;
+      }
+      case "artist": {
+        itemUrl = tidalItem.url || `https://listen.tidal.com/artist/${tidalItem.id}`;
+        item.type = "artist";
+        item.url = itemUrl;
+        item.title = tidalItem.title;
+        item.quality = mediaItem.quality || "max";
+        break;
+      }
+      case "artist_videos": {
+        itemUrl = tidalItem.url || `https://listen.tidal.com/artist/${tidalItem.id}`;
+        item.type = "artist_videos";
+        item.url = itemUrl;
+        item.title = tidalItem.title;
+        item.quality = mediaItem.quality || "max";
+        break;
+      }
+      case "favorite_albums":
+      case "favorite_tracks":
+      case "favorite_playlists": {
+        item.type = itemType;
+        item.quality = mediaItem.quality || "max";
+        break;
+      }
+      default: {
+        itemType = "track";
+        itemUrl = tidalItem.url || `https://listen.tidal.com/track/${tidalItem.id}`;
+        item.type = "track";
+        item.url = itemUrl;
+        item.title = tidalItem.title;
+        item.artist = tidalItem.artists?.[0]?.name;
+        item.quality = mediaItem.quality || "max";
+        break;
+      }
+    }
+
+    // send to /api/save
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    // add authorization header if token is present
+    if (token) headers["Authorization"] = `Bearer ${token}`;
 
     const response = await ftch.text(`${tidarrUrl}/api/save`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-        Origin: tidarrUrl,
-        Referer: `${tidarrUrl}/`,
-      },
-      body: JSON.stringify({ item: tidarrItem }),
+      headers,
+      body: JSON.stringify({ item }),
     });
 
-    const isSuccess = response === "Created" || 
-                      response.toLowerCase().includes("created") || 
-                      /\b201\b/.test(response);
+    // check for success by response content
+    const isSuccess = response === "Created" ||
+      response.toLowerCase().includes("created") ||
+      /\b201\b/.test(response);
 
     if (isSuccess) {
-      trace.msg.log(
-        `Successfully sent to Tidarr: "${tidarrItem.title}" by ${tidarrItem.artist}`
-      );
+      trace.msg.log(`successfully sent to tidarr: type=${itemType} url=${itemUrl || itemType}`);
     } else {
-      trace.msg.warn(`Unexpected response from Tidarr: ${response}`);
+      trace.msg.warn(`unexpected response from tidarr: ${response}`);
     }
   } catch (error: any) {
-    trace.msg.err("Failed to send to Tidarr:", error.message || error);
+    trace.msg.err("failed to send to tidarr:", error.message || error);
   }
 }
 
